@@ -10,23 +10,17 @@ int main(int argc, char *argv[]){
     int height(300);
     int width(390);
     unsigned char input[height*width];
-    if(argc > 1){
-        char* filename = argv[1];
-        read(filename, input, height * width);
-    }
-    else{
-        char f[] = "../images/cat.raw";
-        char* filename = f;
-        read(filename, input, height * width);
-    }
+    
+    
+    char f[] = "../images/cat.raw";
 
     //input Single-CCD sensor input into image struct
-    image img(input, height, width);
+    image img(f, height, width);
     //convert to openCV mat format for display
     cv::Mat img1(height, width, CV_8UC1, cv::Scalar(50));
     for(auto i = 0; i < height; i++){
         for(auto j = 0; j<width; j++){
-			img1.at<uchar>(i, j) = img.pixels[i][j];
+			img1.at<uchar>(i, j) = img.pixels[0][i][j];
         }
     }
 
@@ -36,7 +30,7 @@ int main(int argc, char *argv[]){
     cv::Mat img2(height, width, CV_8UC1, cv::Scalar(50));
     for(auto i = 0; i < height; i++){
         for(auto j = 0; j<width; j++){
-			img2.at<uchar>(i, j) = uniImg.pixels[i][j];
+			img2.at<uchar>(i, j) = uniImg.pixels[0][i][j];
         }
     }
 

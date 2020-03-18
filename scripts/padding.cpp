@@ -11,31 +11,16 @@ int main(int argc, char *argv[]){
     unsigned char input[height*width];
     int padding = 50;
 
-    if(argc == 2){
-        char f[] = "../images/cat.raw";
-        char* filename = f;
-        std::string pad(argv[1]);
-        padding = std::stoi(pad);
-        read(filename, input, height * width);
-    }
-    if(argc == 3){
-        char* filename = argv[1];
-        std::string pad(argv[2]);
-        padding = std::stoi(pad);
-        read(filename, input, height * width);
-    }
-    else{
-        char f[] = "../images/cat.raw";
-        char* filename = f;
-        read(filename, input, height * width);
-    }
+
+    
+    char f[] = "../images/cat.raw";
 
     //input Single-CCD sensor input into image struct
-    image img1(input, height, width);
+    image img1(f, height, width);
     cv::Mat img2(height, width, CV_8UC1, cv::Scalar(50));
     for(auto i = 0; i < height; i++){
         for(auto j = 0; j<width; j++){
-			img2.at<uchar>(i, j) = img1.pixels[i][j];
+			img2.at<uchar>(i, j) = img1.pixels[0][i][j];
         }
     }
 
@@ -43,7 +28,7 @@ int main(int argc, char *argv[]){
     cv::Mat img(height+padding, width+padding, CV_8UC1, cv::Scalar(50));
     for(auto i = 0; i < height+padding; i++){
         for(auto j = 0; j<width+padding; j++){
-			img.at<uchar>(i, j) = img1.pixels[i][j];
+			img.at<uchar>(i, j) = img1.pixels[0][i][j];
         }
     }
 

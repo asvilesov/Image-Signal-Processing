@@ -1,9 +1,11 @@
 # If you create new headers/cpp files, add them to these list!
 set(HEADER_FILES
+    image.h
     isp.h
 )
 
 set(SOURCE_FILES
+    image.cpp
 	isp.cpp
 )
 
