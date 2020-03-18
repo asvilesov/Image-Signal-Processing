@@ -43,6 +43,7 @@ image::image(const image& other)
     , height(other.height)
     , width(other.width)
     , pixels(other.pixels)
+    , channels(1)
     {}
 
 //Adds Reflective Padding to an Image
@@ -95,6 +96,5 @@ void image::unPad(){
         }
     }
     padd = 0;
-    // pixels = std::move(temp);
-    pixels = temp;
+    pixels = std::move(temp);
 }

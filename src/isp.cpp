@@ -11,9 +11,7 @@
 
 //creating a uniform convolution kernel
 std::vector<std::vector<float>> uniformKern(const int& size){
-    std::cout<<size<< " ";
     float elem = 1.0/static_cast<float>(size*size);
-    std::cout<<elem<< " ";
     return std::vector<std::vector<float>>(size, std::vector<float> (size, elem));
 }
 
@@ -153,9 +151,9 @@ void bilinearDemosaicing(image& img){
             }
         }
     }
-    //img.unPad();
-    // img.pixels = std::move(temp);
-    img.pixels = temp;
+    img.pixels = std::move(temp);
+    img.channels = 3;
+    img.color = RGB;
 }
 
 const int MHCDEMOSAICINGSIZE = 5;
@@ -222,4 +220,6 @@ void demosaicingMHC(image& img){
         }
     }
     img.pixels = std::move(temp);
+    img.channels = 3;
+    img.color = RGB;
 }

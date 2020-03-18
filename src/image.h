@@ -8,8 +8,8 @@
 #include <math.h>
 #include <string>
 
-enum imageType {MHC, BITMAP, YUV};
-enum colorMap {GRAY, RGB, HSV};
+enum imageType {RAW, BITMAP, YUV};
+enum colorMap {CCD, GRAY, RGB, HSV};
 
 struct image
 {

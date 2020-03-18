@@ -2,11 +2,13 @@
 set(HEADER_FILES
     image.h
     isp.h
+    display.h
 )
 
 set(SOURCE_FILES
     image.cpp
-	isp.cpp
+    isp.cpp
+    display.cpp
 )
 
 # Don't change this
