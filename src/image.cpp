@@ -6,6 +6,8 @@ image::image(const char * filename, int h, int w)
     , width(w)
     , pixels(std::vector<std::vector<std::vector<int>>>(1, std::vector<std::vector<int>>(h, std::vector<int> (w)))) 
     , channels(1)
+    , MAX_DEV(255)
+    , MIN_DEV(0)
     {
         FILE *file;
         if (!(file = fopen(filename, "rb"))) {
@@ -30,6 +32,8 @@ image::image(unsigned char *p, int h, int w)
     , width(w)
     , pixels(std::vector<std::vector<std::vector<int>>>(1, std::vector<std::vector<int>>(h, std::vector<int> (w))))
     , channels(1)
+    , MAX_DEV(255)
+    , MIN_DEV(0)
     {
         for(auto i = 0; i < h; i++){
             for(auto j = 0; j < w; j++){
@@ -38,12 +42,36 @@ image::image(unsigned char *p, int h, int w)
         }
 }
 
+image::image(const std::string& filename)
+    : padd(0)
+    , MAX_DEV(255)
+    , MIN_DEV(0)
+    {
+        cv::Mat img;
+        img = cv::imread(filename, CV_LOAD_IMAGE_COLOR);
+        height = img.rows;
+        width = img.cols;
+        channels = img.channels();
+        pixels = std::vector<std::vector<std::vector<int>>>(3, std::vector<std::vector<int>>(height, std::vector<int> (width)));
+        unsigned char* ptr = nullptr;
+        for(auto i = 0; i < height; i++){
+            for(auto j = 0; j<width; j++){
+                for(auto k = 0; k < img.channels(); ++k){
+                    ptr = img.ptr(i, j);
+                    pixels[k][i][j] = ptr[k];
+                }
+            }
+        }
+    }
+
 image::image(const image& other)
     : padd(other.padd)
     , height(other.height)
     , width(other.width)
     , pixels(other.pixels)
-    , channels(1)
+    , channels(other.channels)
+    , MAX_DEV(other.MAX_DEV)
+    , MIN_DEV(other.MIN_DEV)
     {}
 
 //Adds Reflective Padding to an Image
@@ -97,4 +125,19 @@ void image::unPad(){
     }
     padd = 0;
     pixels = std::move(temp);
+}
+
+void image::grayScale(){
+    if(channels == 3){
+        double tempPixel;
+        std::vector<std::vector<std::vector<int>>> temp(1, std::vector<std::vector<int>>(height, std::vector<int> (width)));
+        for(auto i = 0; i < height; ++i){
+            for(auto j = 0; j < width; ++j){
+                tempPixel = 0.2989 * pixels[0][i][j] + 0.5870 * pixels[1][i][j] + 0.1140 * pixels[2][i][j];
+                temp[0][i][j] = tempPixel;
+            }
+        }
+        channels = 1;
+    }
+
 }

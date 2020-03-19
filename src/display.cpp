@@ -22,11 +22,6 @@ void displayImg(const image& img, const std::string& text){
             }
         }
     }
-    //std::cout << cvImg.size << " \n\n";
-    // std::cout <<"\n";
-    // std::cout << img.channels;
-    // std::cout << "\n"; 
-    // std::cout << img.height << "\n";
     cv::namedWindow(text, cv::WINDOW_AUTOSIZE);
     cv::imshow(text, cvImg);
 }

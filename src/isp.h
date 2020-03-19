@@ -1,5 +1,6 @@
 #pragma once
 
+
 #include "image.h"
 #include <fstream>
 #include <algorithm>
@@ -8,19 +9,11 @@
 #include <cmath>
 #include <math.h>
 #include <string>
-
-
-template <class pix>
-inline pix clipAndRound(pix value){
-    pix rValue = round(value);
-    if(rValue >=255){
-        rValue = 255;
-    }
-    else if(rValue <=0){
-        rValue = 0;
-    }
-    return rValue;
-}
+#include <fstream>
+#include <algorithm>
+#include <vector>
+#include <iostream>
+#include <cmath>
 
 template <size_t rows, size_t cols>
 inline float pixConvolution(image& img, int x, int y, const float (&array)[rows][cols]){
@@ -47,9 +40,23 @@ inline float pixConvolution(const std::vector<std::vector<std::vector<int>>>& im
     return sum;
 }
 
+//Convolution between image and kernel
+template <typename t>
+void conv(image& img, const std::vector<std::vector<t>>& kern){
+    int paddSize = kern.size()/2;
+    img.padding(paddSize);
+    auto temp(img.pixels);
+    for(auto i = 0; i < img.height; ++i){
+        for(auto j = 0; j < img.width; ++j){
+            img.pixels[0][i+paddSize][j+paddSize] = pixConvolution(temp, i+paddSize, j+paddSize, kern);
+        }
+    }
+    img.unPad();
+}
+
 std::vector<std::vector<float>> uniformKern(const int& size);
 
-void conv(image& img, const std::vector<std::vector<float>>& kern);
+void sobelFilter(image& img);
 
 void uniformFilter(image& img, const int&size);
 

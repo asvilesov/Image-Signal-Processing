@@ -1,31 +1,28 @@
 //library for image signal processing
 
 #include "isp.h"
-#include <fstream>
-#include <algorithm>
-#include <vector>
-#include <iostream>
-#include <cmath>
-#include <math.h>
-#include <string>
+
+//Sobel X and Y filters
+std::vector<std::vector<int>> xSobel{{1, 0, -1}, {2, 0, -2}, {1, 0, -1}};
+std::vector<std::vector<int>> ySobel{{1, 2, 1}, {0, 0, 0}, {-1, -2, -1}};
+
+//Sobel Edge Detection
+void sobelFilter(image& img){
+    auto tempX = img;
+    auto tempY = img;
+    conv(tempX, xSobel);
+    conv(tempY, ySobel);
+    for(auto i = 0; i < img.height; ++i){
+        for(auto j = 0; j < img.width; ++j){
+            img.pixels[0][i][j] = img.clipAndRound(std::sqrt(pow(tempX.pixels[0][i][j], 2) + pow(tempY.pixels[0][i][j], 2)));
+        }
+    }
+}
 
 //creating a uniform convolution kernel
 std::vector<std::vector<float>> uniformKern(const int& size){
     float elem = 1.0/static_cast<float>(size*size);
     return std::vector<std::vector<float>>(size, std::vector<float> (size, elem));
-}
-
-//Convolution between image and kernel
-void conv(image& img, const std::vector<std::vector<float>>& kern){
-    int paddSize = kern.size()/2;
-    img.padding(paddSize);
-    auto temp(img.pixels);
-    for(auto i = 0; i < img.height; ++i){
-        for(auto j = 0; j < img.width; ++j){
-            img.pixels[0][i+paddSize][j+paddSize] = pixConvolution(temp, i+paddSize, j+paddSize, kern);
-        }
-    }
-    img.unPad();
 }
 
 //uniform lowpass filter
@@ -131,23 +128,23 @@ void bilinearDemosaicing(image& img){
         for(auto j = 0; j < img.width; j++){
             if(i%2 == 0 && j%2 == 0){
                 temp[1][i][j] = img.pixels[0][i+padd][j+padd];
-                temp[2][i][j] = clipAndRound(pixConvolution(img, i+padd, j+padd, brWeakAndBILINEARDEMOSAICING));
-                temp[0][i][j] = clipAndRound(pixConvolution(img, i+padd, j+padd, brWeakOrBILINEARDEMOSAICING));
+                temp[2][i][j] = img.clipAndRound(pixConvolution(img, i+padd, j+padd, brWeakAndBILINEARDEMOSAICING));
+                temp[0][i][j] = img.clipAndRound(pixConvolution(img, i+padd, j+padd, brWeakOrBILINEARDEMOSAICING));
             }
             if(i%2 == 0 && j%2 == 1){
-                temp[1][i][j] = clipAndRound(pixConvolution(img, i+padd, j+padd, greenStrongBILINEARDEMOSAICING));
-                temp[2][i][j] = clipAndRound(pixConvolution(img, i+padd, j+padd, brStrongBILINEARDEMOSAICING));
+                temp[1][i][j] = img.clipAndRound(pixConvolution(img, i+padd, j+padd, greenStrongBILINEARDEMOSAICING));
+                temp[2][i][j] = img.clipAndRound(pixConvolution(img, i+padd, j+padd, brStrongBILINEARDEMOSAICING));
                 temp[0][i][j] = img.pixels[0][i+padd][j+padd];
             }
             if(i%2 == 1 && j%2 == 0){
-                temp[1][i][j] = clipAndRound(pixConvolution(img, i+padd, j+padd, greenStrongBILINEARDEMOSAICING));
+                temp[1][i][j] = img.clipAndRound(pixConvolution(img, i+padd, j+padd, greenStrongBILINEARDEMOSAICING));
                 temp[2][i][j] = img.pixels[0][i+padd][j+padd];
-                temp[0][i][j] = clipAndRound(pixConvolution(img, i+padd, j+padd, brStrongBILINEARDEMOSAICING));
+                temp[0][i][j] = img.clipAndRound(pixConvolution(img, i+padd, j+padd, brStrongBILINEARDEMOSAICING));
             }
             if(i%2 == 1 && j%2 == 1){
                 temp[1][i][j] = img.pixels[0][i+padd][j+padd];
-                temp[2][i][j] = clipAndRound(pixConvolution(img, i+padd, j+padd, brWeakOrBILINEARDEMOSAICING));
-                temp[0][i][j] = clipAndRound(pixConvolution(img, i+padd, j+padd, brWeakAndBILINEARDEMOSAICING));
+                temp[2][i][j] = img.clipAndRound(pixConvolution(img, i+padd, j+padd, brWeakOrBILINEARDEMOSAICING));
+                temp[0][i][j] = img.clipAndRound(pixConvolution(img, i+padd, j+padd, brWeakAndBILINEARDEMOSAICING));
             }
         }
     }
@@ -198,24 +195,24 @@ void demosaicingMHC(image& img){
     for(auto i = 0; i < img.height; i++){
         for(auto j = 0; j < img.width; j++){
             if(i%2 == 0 && j%2 == 0){
-                temp[1][i][j] = clipAndRound(img.pixels[0][i+padd][j+padd]);
-                temp[2][i][j] = clipAndRound(0.125*pixConvolution(img, i+padd, j+padd, redBlueAtGreenEvenMHC));
-                temp[0][i][j] = clipAndRound(0.125*pixConvolution(img, i+padd, j+padd, redBlueAtGreenOddMHC));
+                temp[1][i][j] = img.clipAndRound(img.pixels[0][i+padd][j+padd]);
+                temp[2][i][j] = img.clipAndRound(0.125*pixConvolution(img, i+padd, j+padd, redBlueAtGreenEvenMHC));
+                temp[0][i][j] = img.clipAndRound(0.125*pixConvolution(img, i+padd, j+padd, redBlueAtGreenOddMHC));
             }
             if(i%2 == 0 && j%2 == 1){
-                temp[1][i][j] = clipAndRound(0.125*pixConvolution(img, i+padd, j+padd, greenAtRedBlueMHC));
-                temp[2][i][j] = clipAndRound(0.125*pixConvolution(img, i+padd, j+padd, oppRedBlueMHC));
-                temp[0][i][j] = clipAndRound(img.pixels[0][i+padd][j+padd]);
+                temp[1][i][j] = img.clipAndRound(0.125*pixConvolution(img, i+padd, j+padd, greenAtRedBlueMHC));
+                temp[2][i][j] = img.clipAndRound(0.125*pixConvolution(img, i+padd, j+padd, oppRedBlueMHC));
+                temp[0][i][j] = img.clipAndRound(img.pixels[0][i+padd][j+padd]);
             }
             if(i%2 == 1 && j%2 == 0){
-                temp[1][i][j] = clipAndRound(0.125*pixConvolution(img, i+padd, j+padd, greenAtRedBlueMHC));
-                temp[2][i][j] = clipAndRound(img.pixels[0][i+padd][j+padd]);
-                temp[0][i][j] = clipAndRound(0.125*pixConvolution(img, i+padd, j+padd, oppRedBlueMHC));
+                temp[1][i][j] = img.clipAndRound(0.125*pixConvolution(img, i+padd, j+padd, greenAtRedBlueMHC));
+                temp[2][i][j] = img.clipAndRound(img.pixels[0][i+padd][j+padd]);
+                temp[0][i][j] = img.clipAndRound(0.125*pixConvolution(img, i+padd, j+padd, oppRedBlueMHC));
             }
             if(i%2 == 1 && j%2 == 1){
-                temp[1][i][j] = clipAndRound(img.pixels[0][i+padd][j+padd]);
-                temp[2][i][j] = clipAndRound(0.125*pixConvolution(img, i+padd, j+padd, redBlueAtGreenOddMHC));
-                temp[0][i][j] = clipAndRound(0.125*pixConvolution(img, i+padd, j+padd, redBlueAtGreenEvenMHC));
+                temp[1][i][j] = img.clipAndRound(img.pixels[0][i+padd][j+padd]);
+                temp[2][i][j] = img.clipAndRound(0.125*pixConvolution(img, i+padd, j+padd, redBlueAtGreenOddMHC));
+                temp[0][i][j] = img.clipAndRound(0.125*pixConvolution(img, i+padd, j+padd, redBlueAtGreenEvenMHC));
             }
         }
     }

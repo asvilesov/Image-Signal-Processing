@@ -30,6 +30,7 @@ include_directories("${PROJECT_SOURCE_DIR}"
 add_subdirectory(src)
 
 #executables
+add_executable(try "${PROJECT_SOURCE_DIR}/scripts/test.cpp")
 add_executable(demo "${PROJECT_SOURCE_DIR}/scripts/demosaicing.cpp")
 add_executable(padd "${PROJECT_SOURCE_DIR}/scripts/padding.cpp")
 add_executable(hist "${PROJECT_SOURCE_DIR}/scripts/histogramEqualization.cpp")
@@ -37,6 +38,7 @@ add_executable(low "${PROJECT_SOURCE_DIR}/scripts/lowPassFilter.cpp")
 
 #lib linking
 set(LIBS ${OpenCV_LIBS} src)
+target_link_libraries(try ${LIBS})
 target_link_libraries(demo ${LIBS})
 target_link_libraries(padd ${LIBS})
 target_link_libraries(hist ${LIBS})
