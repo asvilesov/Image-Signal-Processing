@@ -27,6 +27,21 @@ bin - exectubles
 ```
 This command will run histogram equalization on an image
 
+## Contents
+### Image Processing
+Demosaicing -> MHC, Bilinear
+Edge Detection -> Canny, Sobel
+Image Pyramids -> Gaussian+Laplace
+Histogram Equalization
+SNR
+Filters -> Binomial, Gaussian, Uniform, Sharpen
+
+### Feature Detection and Matching
+SIFT (todo)
+
+### Compression
+JPEG (todo)
+
 
 
 Please make sure to update tests as appropriate.
