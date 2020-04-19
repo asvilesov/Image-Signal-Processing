@@ -1,27 +1,32 @@
 #include <iostream>
 #include "isp.h"
 #include "display.h"
+#include "feature.h"
 #include <time.h>
 #include <chrono>
 #include <thread>
 
 int main(int argc, char *argv[]){
 
-    std::string a(std::string("../images/monaLisa.jpg"));
+    std::string a(std::string("../images/cath.jpg"));
     image img(a);
-    displayImg(img, std::string("test"));
-    cv::waitKey(1000);
+    image img2(a);
     img.grayScale();
-    displayImg(img, std::string("test"));
-    cv::waitKey(1000);
-    uniformFilter(img, 5);
-    displayImg(img, std::string("test"));
-    cv::waitKey(1000);
-    sobelFilter(img);
-    displayImg(img, std::string("test"));
 
-    cv::waitKey(0);                                          // Wait for a keystroke in the window
+    sift res(img);
+    
+    for(auto i = 0 ; i < res.dog[0].size(); ++i){
+        displayImg(res.dog[1][i], std::string(std::to_string(i)));
+    }
+    std::cout << res.features.size() << "\n";
+
+    displayImg(res.baseImg, "really");
+
+    for(auto& i : res.features){
+        drawTarget(img2, std::get<0>(i), std::get<1>(i));
+    }
+    displayImg(img2, std::string("test"));
+
+    cv::waitKey(0); // Wait for a keystroke in the window
     return 0;
-
-
 }

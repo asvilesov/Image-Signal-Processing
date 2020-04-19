@@ -3,12 +3,14 @@ set(HEADER_FILES
     image.h
     isp.h
     display.h
+    feature.h
 )
 
 set(SOURCE_FILES
     image.cpp
     isp.cpp
     display.cpp
+    feature.cpp
 )
 
 # Don't change this

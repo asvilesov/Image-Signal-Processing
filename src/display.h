@@ -10,4 +10,6 @@
 #include <string>
 #include <math.h>
 
-void displayImg(const image& img, const std::string& text);
+void displayImg(image& img, const std::string& text);
+
+void drawTarget(image& img, int x, int y);
