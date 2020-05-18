@@ -1,12 +1,22 @@
 #include "feature.h"
 
+extern std::vector<std::vector<double>> xSobel;
+extern std::vector<std::vector<double>> ySobel;
 
 sift::sift(const image& base)
     : dogSpace(base, 3, 1)
     , baseImg(base)
 {
+    scaleSpaceExtremaDetection(base);
+    pointLocalization(base);
+}
+
+//Find extrema points at various scales of image via image pyramid -> DoG Pyramid
+void sift::scaleSpaceExtremaDetection(const image& base)
+{
     std::vector<image> temp;
     image tempImg(base);
+
     //generate gaussian subspace
     for(auto i = 0; i < dogSpace.pyramid.size(); ++i){ //iterate through octavies
         tempImg = dogSpace.pyramid[i];
@@ -14,9 +24,10 @@ sift::sift(const image& base)
             conv(tempImg, gaussFilter(5, SIGMA*pow(2.0, j))); //continually convolve img with gaussian to develop scale space
             temp.emplace_back(tempImg);
         }
-        gaussPyramid.emplace_back(temp);
+        gaussPyramid.emplace_back(std::move(temp));
         temp.clear();
     }
+
     //generate DoG
     std::unique_ptr<image> imgPtr;
     for(auto i = 0; i < gaussPyramid.size(); ++i){
@@ -24,14 +35,13 @@ sift::sift(const image& base)
             imgPtr = sub(gaussPyramid[i][j], gaussPyramid[i][j+1]);
             temp.emplace_back(*imgPtr);
         }
-        dog.emplace_back(temp);
+        dog.emplace_back(std::move(temp));
         temp.clear();
     }
+
     // find preliminary features
     bool max = true;
     bool min = true; 
-
-    int count = 0;
 
     int tempGaussVal = 2;
     for(auto i = 0; i < dog.size(); ++i){ // iterate through octaves
@@ -63,28 +73,62 @@ sift::sift(const image& base)
                     if(max or min){
                         if(dog[i][j].pixels[0][l][m] > 0.03 || dog[i][j].pixels[0][l][m] < 0.03){
                             features.emplace_back(std::make_tuple(static_cast<int>(l*pow(2.0, i-1)),static_cast<int>(m*pow(2.0, i-1)), dog[i][j].pixels[0][l][m]));
-                            //std::cout << l<< " "<< m<< " "<< dog[i][j].pixels[0][l][m] << "\n";
-                            count++;
                         }
                     }
                     max = true;
                     min = true;
                 }
             }
-            std::cout << features.size() << "\n";
-            count = 0;
         }
     }
-    // baseImg.grayScale();
-    // for(auto i : features){
-    //     //std::cout << i.first << " " << i.second <<  " " << baseImg.pixels[0][i.first][i.second] << "\n";
-    //     if(std::get<2>(i) > 0.03 || std::get<2>(i) < 0.03){
-    //         baseImg.pixels[0][std::get<0>(i)][std::get<1>(i)] = 255;
-    //         count++;
-    //     }
-    // }
-    std::cout << count << "\n";
 }
+
+//Create Hessian Matrix at each point
+// | Ixx Ixy |
+// | Ixy Iyy |
+void sift::pointLocalization(const image& base){
+    image xx(base);
+    conv(xx, xSobel);
+    conv(xx, xSobel);
+    image yy(base);
+    conv(yy, ySobel);
+    conv(yy, ySobel);
+    image xy(base);
+    conv(xy, xSobel);
+    conv(xy, ySobel);
+
+    double det;
+    double trace;
+    double responseRatio;
+
+    size_t count = 0;
+    for(auto& feat : features){
+        trace = xx.pixels[0][std::get<0>(feat)][std::get<1>(feat)] + yy.pixels[0][std::get<0>(feat)][std::get<1>(feat)];
+        det = xx.pixels[0][std::get<0>(feat)][std::get<1>(feat)] * yy.pixels[0][std::get<0>(feat)][std::get<1>(feat)] - pow(xy.pixels[0][std::get<0>(feat)][std::get<1>(feat)], 2);
+        responseRatio = pow(trace, 2)/trace;
+        if(det > 0){
+            features.erase(features.begin()+count);
+            std::cout << "pixel: " << std::get<0>(feat) << " " << std::get<1>(feat) << "\n";
+            std::cout << "response ratio: " << responseRatio << "\n";
+            std::cout << "Failed determinant\n";
+        }
+        else if (responseRatio < -10) {
+            features.erase(features.begin()+count);
+            std::cout << "pixel: " << std::get<0>(feat) << " " << std::get<1>(feat) << "\n";
+            std::cout << "response ratio: " << responseRatio << "\n";
+            std::cout << "Failed ratio\n";
+        }
+        else{
+            std::cout << "pixel: " << std::get<0>(feat) << " " << std::get<1>(feat) << "\n";
+            std::cout << "response ratio: " << responseRatio << "\n";
+            std::cout << "Passed!\n";
+        }
+        ++count;
+    }
+
+}
+void sift::pointOrientation(){}
+void sift::pointDescriptor(){}
 
 
 

@@ -1,5 +1,8 @@
+#pragma once
+
 #include "isp.h"
 #include "image.h"
+#include "isp.h"
 
 //SIFT object for storing extraced features from image
 struct sift
@@ -14,6 +17,10 @@ struct sift
     const int DOGSCALE = 5; //if scale is at 5, then we have three sampled scales in each octave
 
     sift(const image& base);
+    void scaleSpaceExtremaDetection(const image& base);
+    void pointLocalization(const image& base);
+    void pointOrientation();
+    void pointDescriptor();
 };
 
 

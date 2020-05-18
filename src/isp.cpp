@@ -175,21 +175,32 @@ std::vector<int> binomialGenerator(int depth){
 }
 
 //Binomial Filter (approx Gauss)
+// add static for faster calling of filters and not having to create each time. 
 std::vector<std::vector<double>> binomFilter(const int& size){
+    static std::map<int, std::vector<std::vector<double>>> filtStore;
     std::vector<std::vector<double>> temp(std::vector<std::vector<double>>(size, std::vector<double>(size)));
-    auto binomFilt(binomialGenerator(size));
-    double sum = 0;
-    for(auto i = 0; i < size; ++i){
-        for(auto j = 0; j <size; ++j){
-            temp[i][j] = binomFilt[i]*binomFilt[j];
-            sum += temp[i][j];
-        }
+    
+    if(filtStore.find(size) != filtStore.end())
+    {
+        temp = filtStore.at(size);
     }
-    for(auto i = 0; i < size; ++i){
-        for(auto j = 0; j <size; ++j){
-            temp[i][j] /= sum;
+    else{
+        auto binomFilt(binomialGenerator(size));
+        double sum = 0;
+        for(auto i = 0; i < size; ++i){
+            for(auto j = 0; j <size; ++j){
+                temp[i][j] = binomFilt[i]*binomFilt[j];
+                sum += temp[i][j];
+            }
         }
+        for(auto i = 0; i < size; ++i){
+            for(auto j = 0; j <size; ++j){
+                temp[i][j] /= sum;
+            }
+        }
+        filtStore.insert({size, temp});
     }
+
     return temp;
 }
 
@@ -201,22 +212,32 @@ double gauss(const int& x, const int& y, const float& std){
 
 // Gaussian Filter
 std::vector<std::vector<double>> gaussFilter(const int& size, const double& std){
+    static std::map<std::pair<int, double>, std::vector<std::vector<double>>> filtStore;
     std::vector<std::vector<double>> temp(std::vector<std::vector<double>>(size, std::vector<double>(size)));
-    int convSize = (size-1)/2;
-    double sum = 0;
-    double tempElem = 0;
-    for(auto i = 0; i < size; ++i){
-        for(auto j = 0; j < size; ++j){
-            tempElem = gauss(i-convSize, j-convSize, std);
-            temp[i][j] = tempElem;
-            sum += tempElem;
-        }
+
+    if(filtStore.find({size, std}) != filtStore.end())
+    {
+        temp = filtStore.at(std::make_pair(size,std));
     }
-    for(auto i = 0; i < size; ++i){
-        for(auto j = 0; j < size; ++j){
-            temp[i][j] /= sum;
+    else{
+        int convSize = (size-1)/2;
+        double sum = 0;
+        double tempElem = 0;
+        for(auto i = 0; i < size; ++i){
+            for(auto j = 0; j < size; ++j){
+                tempElem = gauss(i-convSize, j-convSize, std);
+                temp[i][j] = tempElem;
+                sum += tempElem;
+            }
         }
+        for(auto i = 0; i < size; ++i){
+            for(auto j = 0; j < size; ++j){
+                temp[i][j] /= sum;
+            }
+        }
+        filtStore.insert({{size,std}, temp});
     }
+
     return temp;
 }
 
