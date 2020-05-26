@@ -50,6 +50,19 @@ inline float pixConvolution(const std::vector<std::vector<std::vector<double>>>&
     return sum;
 }
 
+template <class t>
+inline float pixConvolution(const std::vector<std::vector<double>>& img, int x, int y, const std::vector<std::vector<t>>& kernel){
+    int padd = static_cast<int>(kernel.size()/2);
+    int convSize = kernel.size();
+    double sum = 0;
+    for(auto i = 0; i < convSize; i++){
+        for(auto j = 0; j < convSize; j++){
+            sum += kernel[i][j] * static_cast<double>(img[x+padd-i][y+padd-j]);
+        }
+    }
+    return sum;
+}
+
 //Convolution between image and kernel
 template <typename t>
 void conv(image& img, const std::vector<std::vector<t>>& kern){

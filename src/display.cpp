@@ -53,6 +53,8 @@ void drawTarget(image& img, int x, int y){
         if(y > size && y < img.width - size){
             for(auto i = 0; i < size; ++i){
                 for(auto j = 0; j < size; ++j){
+                    img.pixels[0][x-size/2+i][y-size/2+j] = 100;
+                    img.pixels[1][x-size/2+i][y-size/2+j] = 0;
                     img.pixels[2][x-size/2+i][y-size/2+j] = 255;
                 }
             }
