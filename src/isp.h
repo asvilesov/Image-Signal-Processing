@@ -15,6 +15,8 @@
 #include <iostream>
 #include <cmath>
 
+std::pair<double, double> magDir(double x, double y);
+
 struct imagePyramid
 {
     imagePyramid(image input, int minOctave = 6, int maxOctave = 0);

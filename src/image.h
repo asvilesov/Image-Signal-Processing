@@ -16,6 +16,7 @@ enum colorMap {CCD, GRAY, RGB, HSV};
 
 struct image
 {
+    image();
     image(const char * filename, int h, int w);
     image(unsigned char *p, int h, int w);
     image(const std::string& filename);

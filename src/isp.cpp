@@ -2,6 +2,13 @@
 
 #include "isp.h"
 
+//calculate magnitude and direction with a given x and y mag
+std::pair<double, double> magDir(double x, double y){
+    double mag = sqrt(pow(x,2)+pow(y,2));
+    double dir = atan(y/x);
+    return {mag, dir};
+}
+
 imagePyramid::imagePyramid(image input, int minOctave, int maxOctave)
     :base(input)
 {

@@ -1,5 +1,14 @@
 #include "image.h"
 
+image::image()
+    : padd(0)
+    , height(0)
+    , width(0)
+    , channels(1)
+    , MAX_DEV(255)
+    , MIN_DEV(0)
+    {}
+
 image::image(const char * filename, int h, int w)
     : padd(0)
     , height(h)

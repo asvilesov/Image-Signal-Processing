@@ -9,6 +9,7 @@ sift::sift(const image& base)
 {
     scaleSpaceExtremaDetection(base);
     keepContrast(base);
+    pointOrientation();
 }
 
 //Find extrema points at various scales of image via image pyramid -> DoG Pyramid
@@ -133,9 +134,11 @@ std::pair<double, double> sift::pointLocalization(const image& img, int x, int y
 void sift::keepContrast(const image& base){
     image xx(base);
     conv(xx, xSobel);
+    xGradient = xx; //save gradient calculations for later
     conv(xx, xSobel);
     image yy(base);
     conv(yy, ySobel);
+    yGradient = yy;
     conv(yy, ySobel);
     image xy(base);
     conv(xy, xSobel);
@@ -174,7 +177,49 @@ void sift::keepContrast(const image& base){
     }
 
 }
-void sift::pointOrientation(){}
+
+//Descriptor representation through histogram of neighboring gradient and angles with a gaussian weighting function
+// 16x16 sample array condensed to 4x4 descriptor with histograms = 4x4x8 = 128 element feature vector
+void sift::pointOrientation(){
+    //pick right/below as adjusted center, we cannot have center since we need to use even sub regions
+    auto weightFunc = gaussFilter(17, 2);
+
+    std::vector<double> featureVec;
+    std::vector<double> histogram(8);
+    std::pair<double, double> magPhase;
+    int histAngle; 
+    for(auto i : features){
+        //iterate through 16 sub regions
+        for(auto j = -2; j <= 2; ++j){
+            for(auto k = -2; k <= 2; ++k){
+                //SUB Region
+                for(auto x = 0; x < 4; ++x){
+                    for(auto y = 0; y < 4; ++y){
+                        magPhase = magDir(xGradient.pixels[0][std::get<0>(i)+4*j+x][std::get<1>(i)+4*k+y], yGradient.pixels[0][std::get<0>(i)+4*j+x][std::get<1>(i)+4*k+y]);
+                        magPhase.first *= weightFunc[8+4*j+x][8+4*k+y]; //apply Gauss weighting function so outer gradients have less affect
+
+                        if(magPhase.second < 0){
+                            magPhase.second += 360.00;
+                        }
+                        magPhase.second += 22.5; // shifting rotation axis so a value that qualifies as 0 degrees is between 338.5 to 22.5 degrees is now between 0 and 45
+                        histAngle = static_cast<int>(round(magPhase.second/45));
+                        if(histAngle == 8){
+                            histogram[0] += magPhase.first;
+                        }
+                        else{
+                            histogram[histAngle] += magPhase.first;
+                        }
+
+                        featureVec.insert(featureVec.end(), histogram.begin(), histogram.end());
+                        for(auto& z : histogram) z = 0;
+                    }
+                }
+            }
+        }
+        featureDescription.emplace_back(featureVec);
+        featureVec.clear();
+    }
+}
 void sift::pointDescriptor(){}
 
 
